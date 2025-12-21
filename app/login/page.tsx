@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../providers/auth-context";
 
 export default function LoginPage() {
-  const { user, loading, login } = useAuth();
+  const { user, loading, login, loginWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/my-bookings";
@@ -82,6 +82,50 @@ export default function LoginPage() {
             {submitting ? "Signing in..." : "Login"}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={async () => {
+            setSubmitting(true);
+            setError(null);
+            try {
+              await loginWithGoogle();
+              router.replace(redirect);
+            } catch (err) {
+              setError(
+                err instanceof Error ? err.message : "Unable to login with Google.",
+              );
+            } finally {
+              setSubmitting(false);
+            }
+          }}
+          className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            className="h-4 w-4"
+          >
+            <path
+              fill="#4285F4"
+              d="M23.52 12.273c0-.851-.076-1.67-.218-2.455H12v4.64h6.484c-.28 1.5-1.123 2.773-2.39 3.623v3.01h3.87c2.266-2.086 3.556-5.156 3.556-8.818Z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 24c3.24 0 5.956-1.073 7.941-2.909l-3.87-3.01c-1.073.72-2.449 1.148-4.07 1.148-3.131 0-5.784-2.114-6.734-4.947H1.258v3.11C3.231 21.408 7.302 24 12 24Z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.266 14.282A7.213 7.213 0 0 1 4.87 12c0-.792.136-1.563.396-2.282V6.608H1.258A11.996 11.996 0 0 0 0 12c0 1.938.464 3.77 1.258 5.392l4.008-3.11Z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 4.75c1.764 0 3.348.607 4.597 1.798l3.448-3.449C17.952 1.13 15.237 0 12 0 7.302 0 3.231 2.592 1.258 6.608l4.008 3.11C6.216 6.864 8.869 4.75 12 4.75Z"
+            />
+          </svg>
+          Continue with Google
+        </button>
 
         <p className="text-center text-sm text-slate-700">
           New here?{" "}

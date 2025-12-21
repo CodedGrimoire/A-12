@@ -8,25 +8,42 @@ import {
   useMemo,
   useState,
 } from "react";
+import {
+  User as FirebaseUser,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+} from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
 
 type User = {
-  nid: string;
-  name: string;
+  uid: string;
   email: string;
-  contact: string;
-  password: string;
+  name?: string;
+  contact?: string;
+  nid?: string;
+  photoUrl?: string;
 };
 
 type AuthContextShape = {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  register: (user: User) => Promise<User>;
+  loginWithGoogle: () => Promise<User>;
+  register: (user: {
+    nid: string;
+    name: string;
+    email: string;
+    contact: string;
+    password: string;
+  }) => Promise<User>;
   logout: () => void;
 };
 
-const USERS_KEY = "carexyz_users";
-const SESSION_KEY = "carexyz_session";
+const PROFILE_KEY = "carexyz_profiles";
 
 const AuthContext = createContext<AuthContextShape | undefined>(undefined);
 
@@ -35,52 +52,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem(SESSION_KEY);
-    if (saved) {
-      setUser(JSON.parse(saved));
-    }
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+      if (fbUser) {
+        setUser(mapFirebaseUser(fbUser));
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const users: User[] = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-    const match = users.find(
-      (u) =>
-        u.email.toLowerCase() === email.trim().toLowerCase() &&
-        u.password === password,
-    );
-    if (!match) {
-      throw new Error("Invalid email or password.");
-    }
-    localStorage.setItem(SESSION_KEY, JSON.stringify(match));
-    setUser(match);
-    return match;
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const mapped = mapFirebaseUser(cred.user);
+    setUser(mapped);
+    return mapped;
   }, []);
 
-  const register = useCallback(async (newUser: User) => {
-    const users: User[] = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
-    const exists = users.some(
-      (u) => u.email.toLowerCase() === newUser.email.trim().toLowerCase(),
-    );
-    if (exists) {
-      throw new Error("An account with this email already exists.");
-    }
-    const nextUser = { ...newUser, email: newUser.email.trim() };
-    const updated = [...users, nextUser];
-    localStorage.setItem(USERS_KEY, JSON.stringify(updated));
-    localStorage.setItem(SESSION_KEY, JSON.stringify(nextUser));
-    setUser(nextUser);
-    return nextUser;
+  const loginWithGoogle = useCallback(async () => {
+    const cred = await signInWithPopup(auth, googleProvider);
+    const mapped = mapFirebaseUser(cred.user);
+    setUser(mapped);
+    return mapped;
   }, []);
+
+  const register = useCallback(
+    async (newUser: {
+      nid: string;
+      name: string;
+      email: string;
+      contact: string;
+      password: string;
+    }) => {
+      const cred = await createUserWithEmailAndPassword(
+        auth,
+        newUser.email.trim(),
+        newUser.password,
+      );
+      await updateProfile(cred.user, { displayName: newUser.name });
+      storeProfile(cred.user.uid, {
+        nid: newUser.nid,
+        contact: newUser.contact,
+        name: newUser.name,
+      });
+      const mapped = mapFirebaseUser(cred.user);
+      setUser(mapped);
+      return mapped;
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
-    localStorage.removeItem(SESSION_KEY);
+    signOut(auth);
     setUser(null);
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout }),
-    [user, loading, login, register, logout],
+    () => ({ user, loading, login, loginWithGoogle, register, logout }),
+    [user, loading, login, loginWithGoogle, register, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -90,4 +120,26 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
+}
+
+function mapFirebaseUser(fbUser: FirebaseUser): User {
+  const profiles = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+  const extra = profiles[fbUser.uid] || {};
+  return {
+    uid: fbUser.uid,
+    email: fbUser.email || "",
+    name: fbUser.displayName || extra.name,
+    contact: extra.contact,
+    nid: extra.nid,
+    photoUrl: fbUser.photoURL || extra.photoUrl,
+  };
+}
+
+function storeProfile(
+  uid: string,
+  profile: { nid: string; contact: string; name: string; photoUrl?: string },
+) {
+  const profiles = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+  profiles[uid] = profile;
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(profiles));
 }

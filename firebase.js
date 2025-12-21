@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getApps, initializeApp, getApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -16,6 +15,7 @@ const firebaseConfig = {
   measurementId: "G-MERNQH3Y87"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// Initialize Firebase (idempotent for Next.js)
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+export default app;
