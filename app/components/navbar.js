@@ -8,7 +8,6 @@ export default function Navbar() {
   const links = [
     { href: "#about", label: "About", external: false },
     { href: "#services", label: "Services", external: false },
-    { href: "/service/baby-care", label: "Service Detail", external: true },
     { href: "/my-bookings", label: "My Bookings", external: true },
   ];
 

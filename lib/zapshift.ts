@@ -70,6 +70,66 @@ export const zapshiftServices: Service[] = [
     ],
     notes: "For medical interventions, a licensed nurse will be assigned.",
   },
+  {
+    id: "post-surgery-care",
+    name: "Post-Surgery Care",
+    category: "sick",
+    summary: "Recovery-focused support with wound care reminders and mobility help.",
+    description:
+      "Attentive helpers to support recovery at home: medication and wound-care reminders, gentle movement assistance, hydration and nutrition tracking.",
+    hourlyRate: 12,
+    dailyRate: 95,
+    features: [
+      "Vitals & medication prompts",
+      "Assisted mobility and safe transfers",
+      "Rest, hydration, and nutrition monitoring",
+    ],
+  },
+  {
+    id: "special-needs-care",
+    name: "Special Needs Care",
+    category: "baby",
+    summary: "Experienced caregivers for neurodiverse children and adults.",
+    description:
+      "Patient, trained caregivers who understand sensory needs, communication preferences, and structured routines for neurodiverse family members.",
+    hourlyRate: 13,
+    dailyRate: 100,
+    features: [
+      "Sensory-aware routines and communication",
+      "Behavior support and calm transitions",
+      "Family collaboration and daily notes",
+    ],
+  },
+  {
+    id: "overnight-care",
+    name: "Overnight Care",
+    category: "elderly",
+    summary: "Through-the-night safety checks and comfort for elders or kids.",
+    description:
+      "Reliable overnight presence for safety, bathroom support, medication reminders, and reassurance—ideal for elders or kids needing steady supervision.",
+    hourlyRate: 14,
+    dailyRate: 110,
+    features: [
+      "Nighttime safety checks",
+      "Medication and hydration prompts",
+      "Calm companionship and reassurance",
+    ],
+  },
+  {
+    id: "hospital-sitter",
+    name: "Hospital Sitter",
+    category: "sick",
+    summary: "At-hospital companionship and advocacy during stays.",
+    description:
+      "Companions stay with your loved one in hospital, relaying updates to family, advocating for comfort needs, and coordinating with staff where allowed.",
+    hourlyRate: 11,
+    dailyRate: 85,
+    features: [
+      "Coordination with nurses (where permitted)",
+      "Family updates and notes",
+      "Comfort, hydration, and mobility support",
+    ],
+  },
 ];
 
 export function listServices() {
