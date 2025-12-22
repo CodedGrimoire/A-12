@@ -20,7 +20,11 @@ export async function connectDB() {
       .connect(MONGO_URI as string, {
         dbName: "carexyz",
       })
-      .then((mongooseInstance) => mongooseInstance);
+      .then((mongooseInstance) => mongooseInstance)
+      .catch((err) => {
+        cached.promise = null;
+        throw err;
+      });
   }
 
   cached.conn = await cached.promise;
