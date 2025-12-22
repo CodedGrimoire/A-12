@@ -24,3 +24,9 @@ export default function Home() {
     </div>
   );
 }
+
+export const metadata = {
+  title: "Care.xyz | Baby Sitting & Elderly Care Service Platform",
+  description:
+    "Care.xyz connects you with trusted caregivers for babysitting, elderly support, special needs, and recovery care at home.",
+};

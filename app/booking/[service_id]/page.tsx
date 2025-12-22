@@ -7,6 +7,7 @@ import PrivateRoute from "@/app/components/private-route";
 import { useAuth } from "@/app/providers/auth-context";
 import { saveBooking } from "@/lib/bookings";
 import { estimateCost, getServiceById } from "@/lib/zapshift";
+import toast from "react-hot-toast";
 
 type Props = {
   params: Promise<{ service_id: string }>;
@@ -37,16 +38,20 @@ export default function BookingPage({ params }: Props) {
     event.preventDefault();
     if (!service || !user) return;
     if (!location.division || !location.district || !location.city || !location.area) {
-      setError("Please complete the location fields.");
+      const msg = "Please complete the location fields.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
     if (durationValue < 1) {
-      setError("Duration must be at least 1.");
+      const msg = "Duration must be at least 1.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
     setSaving(true);
     try {
-      saveBooking({
+      const record = saveBooking({
         serviceId: service.id,
         serviceName: service.name,
         duration: { value: durationValue, unit: durationUnit },
@@ -55,9 +60,26 @@ export default function BookingPage({ params }: Props) {
         status: "Pending",
         userEmail: user.email,
       });
+      toast.success("Booking saved as Pending. View it in My Bookings.");
+      void fetch("/api/send-invoice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: user.email,
+          serviceName: record.serviceName,
+          duration: `${record.duration.value} ${record.duration.unit}`,
+          totalCost: record.totalCost,
+          location: `${record.location.city}, ${record.location.district}, ${record.location.division} (${record.location.area})`,
+          subject: `Invoice for ${record.serviceName}`,
+        }),
+      }).catch(() => {
+        // fire-and-forget; errors handled silently
+      });
       router.push("/my-bookings");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save booking.");
+      const msg = err instanceof Error ? err.message : "Could not save booking.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSaving(false);
     }

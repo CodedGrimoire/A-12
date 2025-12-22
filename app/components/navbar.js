@@ -10,6 +10,7 @@ export default function Navbar() {
   const links = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
+    ...(user ? [{ href: "/my-bookings", label: "My Bookings" }] : []),
   ];
 
   return (
@@ -19,7 +20,7 @@ export default function Navbar() {
           <img
             src="/logo.png"
             alt="Care.xyz logo"
-            className="h-10 w-auto rounded-full border border-emerald-100 bg-white p-1 shadow-sm"
+            className="h-12 w-auto rounded-full border border-emerald-100 bg-white p-1.5 shadow-sm"
           />
           <span className="text-lg font-semibold tracking-tight">
             Care.xyz — Baby & Elderly Care

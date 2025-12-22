@@ -120,3 +120,18 @@ export default async function ServiceDetail({ params }: Props) {
     </div>
   );
 }
+
+export async function generateMetadata({ params }: Props) {
+  const { service_id } = await params;
+  const service = getServiceById(service_id);
+  if (!service) {
+    return {
+      title: "Service not found | Care.xyz",
+      description: "The requested service could not be found.",
+    };
+  }
+  return {
+    title: `${service.name} | Care.xyz`,
+    description: service.summary,
+  };
+}

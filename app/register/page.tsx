@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../providers/auth-context";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
   const { user, loading, register } = useAuth();
@@ -38,17 +39,21 @@ export default function RegisterPage() {
     event.preventDefault();
     setError(null);
     if (!validatePassword(form.password)) {
-      setError(
-        "Password must be 6+ characters with at least 1 uppercase and 1 lowercase letter.",
-      );
+      const msg =
+        "Password must be 6+ characters with at least 1 uppercase and 1 lowercase letter.";
+      setError(msg);
+      toast.error(msg);
       return;
     }
     setSubmitting(true);
     try {
       await register(form);
+      toast.success("Account created and signed in");
       router.replace(redirect);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to register.");
+      const msg = err instanceof Error ? err.message : "Unable to register.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }

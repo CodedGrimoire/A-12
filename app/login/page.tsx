@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../providers/auth-context";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const { user, loading, login, loginWithGoogle } = useAuth();
@@ -27,9 +28,12 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
+      toast.success("Logged in");
       router.replace(redirect);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to login.");
+      const msg = err instanceof Error ? err.message : "Unable to login.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -92,9 +96,10 @@ export default function LoginPage() {
               await loginWithGoogle();
               router.replace(redirect);
             } catch (err) {
-              setError(
-                err instanceof Error ? err.message : "Unable to login with Google.",
-              );
+              const msg =
+                err instanceof Error ? err.message : "Unable to login with Google.";
+              setError(msg);
+              toast.error(msg);
             } finally {
               setSubmitting(false);
             }

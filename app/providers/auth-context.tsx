@@ -18,6 +18,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
+import toast from "react-hot-toast";
 
 type User = {
   uid: string;
@@ -106,6 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     signOut(auth);
     setUser(null);
+    toast.success("Logged out");
   }, []);
 
   const value = useMemo(
