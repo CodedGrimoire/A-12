@@ -19,6 +19,7 @@ export async function connectDB() {
     cached.promise = mongoose
       .connect(MONGO_URI as string, {
         dbName: "carexyz",
+        serverSelectionTimeoutMS: 3000,
       })
       .then((mongooseInstance) => mongooseInstance)
       .catch((err) => {

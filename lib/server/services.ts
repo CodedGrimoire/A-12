@@ -3,6 +3,9 @@ import { ServiceModel } from "@/lib/models/Service";
 import { seedServices } from "@/lib/seed/services-data";
 
 export async function getAllServices() {
+  if (process.env.USE_SEED_SERVICES_ONLY === "1") {
+    return seedServices.map(toServiceDtoFromSeed);
+  }
   try {
     await connectDB();
     const services = await ServiceModel.find().lean();
@@ -14,6 +17,10 @@ export async function getAllServices() {
 }
 
 export async function getServiceBySlug(slug: string) {
+  if (process.env.USE_SEED_SERVICES_ONLY === "1") {
+    const fallback = seedServices.find((s) => s.id === slug);
+    return fallback ? toServiceDtoFromSeed(fallback) : null;
+  }
   try {
     await connectDB();
     const service = await ServiceModel.findOne({ slug }).lean();
@@ -25,6 +32,9 @@ export async function getServiceBySlug(slug: string) {
 }
 
 export async function ensureSeededServices() {
+  if (process.env.USE_SEED_SERVICES_ONLY === "1") {
+    return;
+  }
   try {
     await connectDB();
     const count = await ServiceModel.countDocuments();
