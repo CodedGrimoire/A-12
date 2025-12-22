@@ -1,12 +1,10 @@
 "use client";
 
-import { FormEvent, use, useMemo, useState } from "react";
+import { FormEvent, use, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PrivateRoute from "@/app/components/private-route";
 import { useAuth } from "@/app/providers/auth-context";
-import { saveBooking } from "@/lib/bookings";
-import { estimateCost, getServiceById } from "@/lib/zapshift";
 import toast from "react-hot-toast";
 
 type Props = {
@@ -15,7 +13,8 @@ type Props = {
 
 export default function BookingPage({ params }: Props) {
   const { service_id } = use(params);
-  const service = useMemo(() => getServiceById(service_id), [service_id]);
+  const [service, setService] = useState<any | null>(null);
+  const [loadingService, setLoadingService] = useState(true);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -31,10 +30,33 @@ export default function BookingPage({ params }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const totalCost = service
-    ? estimateCost(service, { value: durationValue, unit: durationUnit })
+    ? (() => {
+        const rate =
+          durationUnit === "hours" ? service.hourlyRate : service.dailyRate;
+        const subtotal = rate * durationValue;
+        const platformFee = Math.max(5, subtotal * 0.05);
+        return Math.round((subtotal + platformFee) * 100) / 100;
+      })()
     : 0;
 
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    let mounted = true;
+    setLoadingService(true);
+    fetch(`/api/services/${service_id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (mounted) setService(data.service);
+      })
+      .catch(() => {
+        if (mounted) setService(null);
+      })
+      .finally(() => mounted && setLoadingService(false));
+    return () => {
+      mounted = false;
+    };
+  }, [service_id]);
+
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!service || !user) return;
     if (!location.division || !location.district || !location.city || !location.area) {
@@ -51,15 +73,23 @@ export default function BookingPage({ params }: Props) {
     }
     setSaving(true);
     try {
-      const record = saveBooking({
-        serviceId: service.id,
-        serviceName: service.name,
-        duration: { value: durationValue, unit: durationUnit },
-        location,
-        totalCost,
-        status: "Pending",
-        userEmail: user.email,
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userUid: user.uid,
+          userEmail: user.email,
+          serviceId: service.id,
+          duration: { value: durationValue, unit: durationUnit },
+          location,
+        }),
       });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Could not save booking.");
+      }
+      const data = await response.json();
+      const record = data.booking;
       toast.success("Booking saved as Pending. View it in My Bookings.");
       void fetch("/api/send-invoice", {
         method: "POST",
@@ -85,7 +115,7 @@ export default function BookingPage({ params }: Props) {
     }
   };
 
-  if (!service) {
+  if (!service && !loadingService) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f6fbff] px-6">
         <div className="max-w-lg rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-lg">
@@ -118,9 +148,7 @@ export default function BookingPage({ params }: Props) {
               <h1 className="text-3xl font-bold text-slate-900">
                 {service.name}
               </h1>
-              <p className="text-sm text-slate-600">
-                Data pulled from Zapshift resources.
-              </p>
+              <p className="text-sm text-slate-600">Pulled from Care.xyz services.</p>
             </div>
             <Link
               href={`/service/${service.id}`}

@@ -1,18 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getServiceById, listServices } from "@/lib/zapshift";
+import {
+  ensureSeededServices,
+  getServiceBySlug,
+} from "@/lib/server/services";
+
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ service_id: string }>;
 };
 
-export async function generateStaticParams() {
-  return listServices().map((service) => ({ service_id: service.id }));
-}
-
 export default async function ServiceDetail({ params }: Props) {
   const { service_id } = await params;
-  const service = getServiceById(service_id);
+  await ensureSeededServices();
+  const service = await getServiceBySlug(service_id);
 
   if (!service) {
     notFound();
@@ -123,7 +125,8 @@ export default async function ServiceDetail({ params }: Props) {
 
 export async function generateMetadata({ params }: Props) {
   const { service_id } = await params;
-  const service = getServiceById(service_id);
+  await ensureSeededServices();
+  const service = await getServiceBySlug(service_id);
   if (!service) {
     return {
       title: "Service not found | Care.xyz",

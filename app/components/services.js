@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { listServices } from "@/lib/zapshift";
+import { ensureSeededServices, getAllServices } from "@/lib/server/services";
 
-export default function Services({
+export default async function Services({
   limit,
   title = "Choose the care that fits your family.",
   description = "Baby sitting, elderly care, or special care at home—book for the hours you need with vetted professionals you can trust.",
   hideCta = false,
 }) {
-  const services = listServices();
+  await ensureSeededServices();
+  const services = await getAllServices();
   const items = typeof limit === "number" ? services.slice(0, limit) : services;
   return (
     <section
