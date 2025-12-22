@@ -47,7 +47,19 @@ export default function RegisterPage() {
     }
     setSubmitting(true);
     try {
-      await register(form);
+      const created = await register(form);
+      await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: created.uid,
+          email: created.email,
+          name: form.name,
+          contact: form.contact,
+          nid: form.nid,
+          photoUrl: created.photoUrl,
+        }),
+      }).catch(() => {});
       toast.success("Account created and signed in");
       router.replace(redirect);
     } catch (err) {

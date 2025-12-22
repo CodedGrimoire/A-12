@@ -4,24 +4,57 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import PrivateRoute from "@/app/components/private-route";
 import { useAuth } from "@/app/providers/auth-context";
-import { cancelBooking, loadBookings } from "@/lib/bookings";
-import type { Booking } from "@/lib/zapshift";
+import toast from "react-hot-toast";
+
+type Booking = {
+  _id: string;
+  serviceName: string;
+  duration: { value: number; unit: "hours" | "days" };
+  location: { division: string; district: string; city: string; area: string };
+  totalCost: number;
+  status: "Pending" | "Confirmed" | "Completed" | "Cancelled";
+  createdAt: string;
+};
 
 export default function MyBookingsPage() {
   const { user } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setBookings(loadBookings(user.email));
-    }
+    const load = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/bookings?userUid=${user.uid}`);
+        if (!res.ok) throw new Error("Failed to load bookings");
+        const data = await res.json();
+        setBookings(data.bookings || []);
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Unable to load bookings",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, [user]);
 
-  const handleCancel = (id: string) => {
-    cancelBooking(id);
-    if (user) {
-      setBookings(loadBookings(user.email));
+  const handleCancel = async (id: string) => {
+    try {
+      const res = await fetch(`/api/bookings/${id}/cancel`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed to cancel booking");
+      const data = await res.json();
+      setBookings((prev) =>
+        prev.map((b) => (b._id === id ? { ...b, status: data.booking.status } : b)),
+      );
+      toast.success("Booking cancelled");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Unable to cancel booking");
     }
   };
 
@@ -46,7 +79,11 @@ export default function MyBookingsPage() {
             </Link>
           </div>
 
-          {bookings.length === 0 ? (
+          {loading ? (
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow">
+              <p className="text-sm text-slate-700">Loading your bookings...</p>
+            </div>
+          ) : bookings.length === 0 ? (
             <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow">
               <p className="text-lg font-semibold text-slate-900">
                 No bookings yet
@@ -64,10 +101,10 @@ export default function MyBookingsPage() {
           ) : (
             <div className="grid gap-4">
               {bookings.map((booking) => {
-                const isOpen = expanded === booking.id;
+                const isOpen = expanded === booking._id;
                 return (
                   <div
-                    key={booking.id}
+                    key={booking._id}
                     className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
                   >
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -93,7 +130,7 @@ export default function MyBookingsPage() {
                       <div className="flex gap-2">
                         <button
                           onClick={() =>
-                            setExpanded(isOpen ? null : booking.id)
+                            setExpanded(isOpen ? null : booking._id)
                           }
                           className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 hover:border-emerald-200 hover:text-emerald-700"
                         >
@@ -101,7 +138,7 @@ export default function MyBookingsPage() {
                         </button>
                         {booking.status !== "Cancelled" ? (
                           <button
-                            onClick={() => handleCancel(booking.id)}
+                            onClick={() => handleCancel(booking._id)}
                             className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-slate-800"
                           >
                             Cancel booking

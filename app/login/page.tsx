@@ -27,7 +27,19 @@ export default function LoginPage() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email, password);
+      const logged = await login(email, password);
+      await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: logged.uid,
+          email: logged.email,
+          name: logged.name,
+          contact: logged.contact,
+          nid: logged.nid,
+          photoUrl: logged.photoUrl,
+        }),
+      }).catch(() => {});
       toast.success("Logged in");
       router.replace(redirect);
     } catch (err) {
