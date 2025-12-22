@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, use, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PrivateRoute from "@/app/components/private-route";
@@ -9,14 +9,12 @@ import { saveBooking } from "@/lib/bookings";
 import { estimateCost, getServiceById } from "@/lib/zapshift";
 
 type Props = {
-  params: { service_id: string };
+  params: Promise<{ service_id: string }>;
 };
 
 export default function BookingPage({ params }: Props) {
-  const service = useMemo(
-    () => getServiceById(params.service_id),
-    [params.service_id],
-  );
+  const { service_id } = use(params);
+  const service = useMemo(() => getServiceById(service_id), [service_id]);
   const { user } = useAuth();
   const router = useRouter();
 

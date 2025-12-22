@@ -1,8 +1,14 @@
 import Link from "next/link";
 import { listServices } from "@/lib/zapshift";
 
-export default function Services() {
+export default function Services({
+  limit,
+  title = "Choose the care that fits your family.",
+  description = "Baby sitting, elderly care, or special care at home—book for the hours you need with vetted professionals you can trust.",
+  hideCta = false,
+}) {
   const services = listServices();
+  const items = typeof limit === "number" ? services.slice(0, limit) : services;
   return (
     <section
       id="services"
@@ -15,22 +21,33 @@ export default function Services() {
               Services overview
             </p>
             <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-              Choose the care that fits your family.
+              {title}
             </h2>
             <p className="mt-2 max-w-2xl text-slate-700">
-              Baby sitting, elderly care, or special care at home—book for the
-              hours you need with vetted professionals you can trust.
+              {description}
             </p>
           </div>
-          <a
-            href="#book"
-            className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-300 transition hover:-translate-y-0.5 hover:bg-slate-800"
-          >
-            Book a caregiver
-          </a>
+          <div className="flex items-center gap-3">
+            {limit ? (
+              <Link
+                href="/services"
+                className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:text-emerald-700"
+              >
+                View all services
+              </Link>
+            ) : null}
+            {!hideCta ? (
+              <a
+                href="/booking/baby-care"
+                className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-300 transition hover:-translate-y-0.5 hover:bg-slate-800"
+              >
+                Book a caregiver
+              </a>
+            ) : null}
+          </div>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
-          {services.map((service) => (
+          {items.map((service) => (
             <article
               key={service.id}
               className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-xl"

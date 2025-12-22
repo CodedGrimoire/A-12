@@ -17,7 +17,11 @@ export default function Home() {
       <main className="relative">
         <Hero />
         <About />
-        <Services />
+        <Services
+          limit={3}
+          title="Top services we deliver best"
+          description="Explore our most-booked care options—tap View all to see every service we offer."
+        />
         <Testimonials />
       </main>
       <Footer />

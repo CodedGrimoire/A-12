@@ -1,25 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "../providers/auth-context";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const pathname = usePathname();
   const links = [
-    { href: "#about", label: "About", external: false },
-    { href: "#services", label: "Services", external: false },
-    { href: "/my-bookings", label: "My Bookings", external: true },
+    { href: "/", label: "Home" },
+    { href: "/services", label: "Services" },
   ];
 
   return (
     <header className="sticky top-0 z-30 backdrop-blur bg-white/80 border-b border-slate-200">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2 text-slate-900">
-          <div className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700 shadow-sm">
-            Care.xyz
-          </div>
+        <Link href="/" className="flex items-center gap-3 text-slate-900">
+          <img
+            src="/logo.png"
+            alt="Care.xyz logo"
+            className="h-10 w-auto rounded-full border border-emerald-100 bg-white p-1 shadow-sm"
+          />
           <span className="text-lg font-semibold tracking-tight">
-            Baby & Elderly Care
+            Care.xyz — Baby & Elderly Care
           </span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium text-slate-700 md:flex">
@@ -27,9 +30,16 @@ export default function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className="transition-colors hover:text-emerald-700"
+              className={`relative pb-1 transition-colors hover:text-emerald-700 ${
+                isActive(pathname, link.href)
+                  ? "text-emerald-700"
+                  : "text-slate-700"
+              }`}
             >
               {link.label}
+              {isActive(pathname, link.href) ? (
+                <span className="absolute inset-x-0 -bottom-1 h-0.5 rounded-full bg-emerald-600" />
+              ) : null}
             </Link>
           ))}
         </nav>
@@ -105,4 +115,18 @@ function Avatar({ name, photoUrl }) {
       {initials}
     </span>
   );
+}
+
+function isActive(pathname, href) {
+  if (href === "/") {
+    return pathname === "/";
+  }
+  if (href === "/services") {
+    return (
+      pathname === "/services" ||
+      pathname.startsWith("/services/") ||
+      pathname.startsWith("/service/")
+    );
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
