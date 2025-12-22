@@ -71,7 +71,7 @@ export default async function ServiceDetail({ params }: Props) {
                 What you get
               </h2>
               <ul className="grid gap-3 sm:grid-cols-2">
-                {service.features.map((feature) => (
+                {service.features.map((feature: string) => (
                   <li
                     key={feature}
                     className="flex items-start gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-800 ring-1 ring-slate-200"
