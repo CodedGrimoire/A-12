@@ -1,12 +1,20 @@
 "use client";
+import toast from "react-hot-toast";
+
+
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import PrivateRoute from "@/app/components/private-route";
-import { useAuth } from "@/app/providers/auth-context";
-import toast from "react-hot-toast";
 
-type Booking = {
+import { useAuth } from "@/app/providers/auth-context";
+
+ import PrivateRoute from "@/app/components/private-route";
+
+
+type Booking = 
+
+
+{
   _id: string;
   serviceName: string;
   duration: { value: number; unit: "hours" | "days" };
@@ -16,17 +24,33 @@ type Booking = {
   createdAt: string;
 };
 
-export default function MyBookingsPage() {
+export default function MyBookingsPage() 
+
+
+{
+
+
+   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
-  const [bookings, setBookings] = useState<Booking[]>([]);
+ 
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+
+    const [bookings, setBookings] = useState<Booking[]>([]);
+
+
+ 
 
   useEffect(() => {
-    const load = async () => {
+    const load = async () => 
+      
+      
+      {
       if (!user) return;
       setLoading(true);
-      try {
+      try 
+      
+      
+      {
         const res = await fetch(`/api/bookings?userUid=${user.uid}`);
         if (!res.ok) throw new Error("Failed to load bookings");
         const data = await res.json();
@@ -35,20 +59,41 @@ export default function MyBookingsPage() {
           (b: Booking) => b.status !== "Cancelled",
         );
         setBookings(list);
-      } catch (err) {
+      }
+      
+      
+      catch (err)
+      
+      
+      {
         toast.error(
           err instanceof Error ? err.message : "Unable to load bookings",
         );
-      } finally {
+      }
+      
+      
+      finally
+      
+      
+      {
         setLoading(false);
       }
     };
     load();
   }, [user]);
 
-  const handleCancel = async (id: string) => {
-    try {
-      const res = await fetch(`/api/bookings/${id}/cancel`, {
+  const handleCancel = async (id: string) => 
+    
+    
+    {
+    try 
+    
+    
+    {
+      const res = await fetch(`/api/bookings/${id}/cancel`,
+        
+        
+        {
         method: "POST",
       });
       if (!res.ok) throw new Error("Failed to cancel booking");
@@ -57,21 +102,52 @@ export default function MyBookingsPage() {
       setBookings((prev) => prev.filter((b) => b._id !== id));
       setExpanded((prev) => (prev === id ? null : prev));
       toast.success("Booking cancelled");
-    } catch (err) {
+    }
+    
+    
+    catch (err) 
+    
+    
+    {
       toast.error(err instanceof Error ? err.message : "Unable to cancel booking");
     }
   };
 
   return (
     <PrivateRoute>
-      <div className="min-h-screen bg-[#f6fbff] px-6 py-12">
-        <div className="mx-auto max-w-6xl space-y-6">
-          <div className="flex items-center justify-between">
+      <div 
+      
+      
+      className="min-h-screen 
+      
+      
+      bg-[#f6fbff] px-6 py-12">
+        <div 
+        
+        
+        className="mx-auto max-w-6xl space-y-6">
+          <div className="flex items-center 
+          
+          
+          justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              <p 
+              
+              
+              className="text-xs font-semibold tracking-wide
+              
+              
+              text-emerald-700">
                 My bookings
               </p>
-              <h1 className="text-3xl font-bold text-slate-900">
+              <h1 
+              
+              
+              className="text-3xl 
+              
+              
+              
+              font-bold text-slate-900">
                 Your Care.xyz requests
               </h1>
             </div>
@@ -84,20 +160,60 @@ export default function MyBookingsPage() {
           </div>
 
           {loading ? (
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow">
-              <p className="text-sm text-slate-700">Loading your bookings...</p>
+            <div className="rounded-3xl
+            
+            
+            border border-slate-200 
+            
+            
+            
+            bg-white p-6 text-center shadow">
+              <p 
+              
+              
+              
+              className="text-sm text-slate-700">
+                
+                
+                Loading your bookings......
+                </p>
             </div>
           ) : bookings.length === 0 ? (
-            <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow">
+            <div
+            
+            
+            
+            className="rounded-3xl border border-slate-200 
+            
+            
+            
+            bg-white p-6 text-center shadow">
               <p className="text-lg font-semibold text-slate-900">
                 No bookings yet
               </p>
-              <p className="mt-2 text-sm text-slate-600">
+              <p 
+              
+              
+              className="mt-2 text-sm 
+              
+              
+              
+              text-slate-600">
                 Book baby care, elderly service, or sick care to see them here.
               </p>
               <Link
                 href="/services"
-                className="mt-4 inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                className="mt-4 inline-flex items-center 
+                
+                
+                justify-center rounded-full bg-emerald-600 px-4 py-2
+                
+                
+                
+                text-sm font-semibold text-white 
+                
+                
+                hover:bg-emerald-700"
               >
                 Browse services
               </Link>
@@ -111,23 +227,53 @@ export default function MyBookingsPage() {
                     key={booking._id}
                     className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
                   >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div 
+                    
+                    
+                    className="flex flex-col 
+                    
+                    
+                    gap-3 md:flex-row md:items-center
+                    
+                    
+                    md:justify-between">
                       <div>
-                        <p className="text-sm uppercase tracking-wide text-slate-500">
+                        <p 
+                        
+                        
+                        className="text-sm uppercase tracking-wide text-slate-500">
                           {booking.serviceName}
                         </p>
-                        <p className="text-lg font-semibold text-slate-900">
+                        <p 
+                        
+                        
+                        className="text-lg font-semibold text-slate-900">
                           {booking.duration.value} {booking.duration.unit}
                         </p>
+
+
+
+
                         <p className="text-sm text-slate-600">
                           {booking.location.city}, {booking.location.district}
                         </p>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div
+                       className="flex items-center gap-3">
                         <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-100">
                           {booking.status}
                         </span>
-                        <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-800 ring-1 ring-slate-200">
+                        <span className="rounded-full bg-slate-50
+                        
+                        
+                        
+                        
+                        px-3 py-1 text-xs font-semibold text-slate-800 ring-1 
+                        
+                        
+                        
+                        
+                        ring-slate-200">
                           ৳{booking.totalCost}
                         </span>
                       </div>
@@ -151,11 +297,34 @@ export default function MyBookingsPage() {
                       </div>
                     </div>
                     {isOpen ? (
-                      <div className="mt-4 grid gap-2 border-t border-slate-100 pt-4 text-sm text-slate-700 md:grid-cols-4">
-                        <Info label="Division" value={booking.location.division} />
-                        <Info label="District" value={booking.location.district} />
-                        <Info label="City" value={booking.location.city} />
-                        <Info label="Area / Address" value={booking.location.area} />
+                      <div className="mt-4 grid gap-2 
+                      
+                      
+                      border-t border-slate-100 pt-4 text-sm 
+                      
+                      
+                      
+                      text-slate-700 md:grid-cols-4">
+                        <Info label="Division" 
+                        
+                        
+                        value={booking.location.division} 
+                        
+                        />
+                        <Info label="District" 
+                        
+                        
+                        
+                        value={booking.location.district} />
+                        <Info label="City" 
+                        
+                        
+                        
+                        value={booking.location.city} />
+                        <Info label="Area / Address" 
+                        
+                        
+                        value={booking.location.area} />
                         <Info
                           label="Duration"
                           value={`${booking.duration.value} ${booking.duration.unit}`}
@@ -164,10 +333,25 @@ export default function MyBookingsPage() {
                           label="Created"
                           value={new Date(booking.createdAt).toLocaleString()}
                         />
-                        <Info label="Status" value={booking.status} />
-                        <Info label="Total Cost" value={`৳${booking.totalCost}`} />
+                        <Info label="Status" 
+                        
+                        
+                        
+                        value={booking.status} />
+                        <Info
+                        
+                        
+                        
+                        label="Total Cost" 
+                        
+                        
+                        
+                        value={`৳${booking.totalCost}`} />
                       </div>
-                    ) : null}
+                    ) : null
+                    
+                    
+                    }
                   </div>
                 );
               })}
@@ -179,13 +363,34 @@ export default function MyBookingsPage() {
   );
 }
 
-function Info({ label, value }: { label: string; value: string }) {
+function Info({ label, value }: { label: string; value: string })
+
+
+{
   return (
     <div className="flex flex-col">
-      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <span
+      
+      
+      className="text-xs font-semibold 
+      
+      
+      uppercase tracking-wide 
+      
+      
+      text-slate-500">
         {label}
       </span>
-      <span className="text-slate-800">{value}</span>
+      <span
+      
+      
+      className="text-slate-800">
+        
+        
+        {value}
+        
+        
+        </span>
     </div>
   );
 }

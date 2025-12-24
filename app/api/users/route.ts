@@ -1,12 +1,25 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
+
 import { UserModel } from "@/lib/models/User";
 
-export async function POST(request: Request) {
-  try {
+
+import { connectDB } from "@/lib/db";
+
+export async function POST(request: Request) 
+
+
+{
+  try 
+  
+  {
     const body = await request.json();
     const { uid, email, name, contact, nid, photoUrl } = body;
-    if (!uid || !email) {
+
+
+    if (!uid || !email)
+      
+      
+      {
       return NextResponse.json({ error: "Missing uid or email" }, { status: 400 });
     }
     await connectDB();
@@ -16,8 +29,14 @@ export async function POST(request: Request) {
       { upsert: true, new: true, setDefaultsOnInsert: true },
     ).lean();
     return NextResponse.json({ user });
-  } catch (error) {
-    console.error("User upsert failed", error);
+  } 
+  
+  
+  catch (error) 
+  
+  
+  {
+  //  console.error("User upsert failed", error);
     return NextResponse.json({ error: "Failed to save user" }, { status: 500 });
   }
 }

@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
+
+
 import nodemailer from "nodemailer";
 
-export async function POST(request: Request) {
-  try {
+export async function POST(request: Request) 
+
+
+{
+  try 
+  
+  {
     const body = await request.json();
-    const {
+    const
+    
+    
+    {
       to,
       subject = "Care.xyz Booking Invoice",
       serviceName,
@@ -13,7 +23,10 @@ export async function POST(request: Request) {
       location,
     } = body;
 
-    if (!to) {
+    if (!to)
+      
+      
+      {
       return NextResponse.json({ error: "Missing recipient email." }, { status: 400 });
     }
 
@@ -35,7 +48,10 @@ export async function POST(request: Request) {
         { status: 500 },
       );
     }
-    const transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport(
+      
+      
+      {
       host,
       port,
       secure: port === 465,
@@ -57,7 +73,10 @@ export async function POST(request: Request) {
       <p>We will confirm availability shortly.</p>
     `;
 
-    const info = await transporter.sendMail({
+    const info = await transporter.sendMail(
+      
+      
+      {
       from: from || user,
       to,
       subject,
@@ -65,8 +84,15 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ ok: true, messageId: info.messageId });
-  } catch (error) {
-    console.error("Email send error", error);
+  } 
+  
+  
+  catch (error) 
+  
+  
+  
+  {
+   // console.error("Email send error", error);
     return NextResponse.json(
       { error: "Failed to send invoice email. Check server logs for details." },
       { status: 500 },

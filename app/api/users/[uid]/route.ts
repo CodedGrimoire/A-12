@@ -6,17 +6,32 @@ type Params = {
   params: Promise<{ uid: string }>;
 };
 
-export async function GET(_: Request, { params }: Params) {
-  try {
+export async function GET(_: Request, { params }: Params) 
+
+
+{
+  try 
+  
+  
+  {
     const { uid } = await params;
     await connectDB();
     const user = await UserModel.findOne({ uid }).lean();
-    if (!user) {
+
+
+    if (!user) 
+      
+      {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
     return NextResponse.json({ user });
-  } catch (error) {
-    console.error("Fetch user failed", error);
+  } 
+  
+  catch (error) 
+  
+  
+  {
+   // console.error("Fetch user failed", error);
     return NextResponse.json({ error: "Failed to load user" }, { status: 500 });
   }
 }
