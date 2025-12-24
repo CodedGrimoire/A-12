@@ -136,6 +136,26 @@ export default function BookingPage({ params }: Props) {
     );
   }
 
+  if (loadingService) {
+    return (
+      <PrivateRoute>
+        <div className="flex min-h-screen items-center justify-center bg-[#f6fbff] px-6">
+          <div className="max-w-lg rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-lg">
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+              Booking
+            </p>
+            <h1 className="mt-2 text-2xl font-bold text-slate-900">
+              Loading service…
+            </h1>
+            <p className="mt-2 text-slate-600">
+              Please wait while we load the service details.
+            </p>
+          </div>
+        </div>
+      </PrivateRoute>
+    );
+  }
+
   return (
     <PrivateRoute>
       <div className="min-h-screen bg-[#f6fbff] px-6 py-12">
