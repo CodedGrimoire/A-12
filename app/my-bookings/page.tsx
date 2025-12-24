@@ -30,7 +30,11 @@ export default function MyBookingsPage() {
         const res = await fetch(`/api/bookings?userUid=${user.uid}`);
         if (!res.ok) throw new Error("Failed to load bookings");
         const data = await res.json();
-        setBookings(data.bookings || []);
+        // Hide cancelled bookings from the list.
+        const list: Booking[] = (data.bookings || []).filter(
+          (b: Booking) => b.status !== "Cancelled",
+        );
+        setBookings(list);
       } catch (err) {
         toast.error(
           err instanceof Error ? err.message : "Unable to load bookings",
@@ -48,10 +52,10 @@ export default function MyBookingsPage() {
         method: "POST",
       });
       if (!res.ok) throw new Error("Failed to cancel booking");
-      const data = await res.json();
-      setBookings((prev) =>
-        prev.map((b) => (b._id === id ? { ...b, status: data.booking.status } : b)),
-      );
+      await res.json();
+      // Remove the cancelled booking from the list immediately.
+      setBookings((prev) => prev.filter((b) => b._id !== id));
+      setExpanded((prev) => (prev === id ? null : prev));
       toast.success("Booking cancelled");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Unable to cancel booking");
@@ -72,7 +76,7 @@ export default function MyBookingsPage() {
               </h1>
             </div>
             <Link
-              href="/#services"
+              href="/services"
               className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-700"
             >
               New booking
@@ -92,7 +96,7 @@ export default function MyBookingsPage() {
                 Book baby care, elderly service, or sick care to see them here.
               </p>
               <Link
-                href="/#services"
+                href="/services"
                 className="mt-4 inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
               >
                 Browse services
